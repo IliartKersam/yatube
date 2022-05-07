@@ -11,7 +11,6 @@ from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from ..models import Post, Group, Comment, Follow
-from ..forms import CommentForm
 
 User = get_user_model()
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
