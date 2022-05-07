@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}
+  Последние обновления избранных авторов
+{% endblock %}
+{% block content %}
+   {% include 'posts/includes/switcher.html' %}
+    <h1>Последние обновления избранных авторов</h1>
+    {% for post in page_obj %}
+      {% include 'posts/posts.html' with show_group=True show_profile=True %}
+      {% if not forloop.last %}
+        <hr>
+      {% endif %}
+    {% endfor %}
+    {% include 'includes/paginator.html' %}
+{% endblock %}
