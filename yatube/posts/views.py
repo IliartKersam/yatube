@@ -40,6 +40,10 @@ def profile(request: Type[HttpRequest], username: str) -> Type[HttpResponse]:
     post_list: Type[QuerySet] = author.posts.select_related('author', 'group')
     page_obj = pag_posts(request, post_list)
     user = request.user
+    if not request.user.is_authenticated or request.user == author:
+        show_follow = False
+    else:
+        show_follow = True
     if request.user.is_authenticated:
         following = Follow.objects.filter(user=user, author=author).exists()
     else:
@@ -47,7 +51,8 @@ def profile(request: Type[HttpRequest], username: str) -> Type[HttpResponse]:
     context = {
         'page_obj': page_obj,
         'author': author,
-        'following': following
+        'following': following,
+        'show_follow': show_follow
     }
     return render(request, 'posts/profile.html', context)
 
