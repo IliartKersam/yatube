@@ -15,7 +15,6 @@ def index(request: Type[HttpRequest]) -> Type[HttpResponse]:
     """Определяем функцию для главной страницы."""
     post_list: Type[QuerySet] = Post.objects.select_related('author', 'group')
     page_obj = pag_posts(request, post_list)
-
     context = {
         'page_obj': page_obj,
     }
@@ -36,18 +35,13 @@ def group_posts(request: Type[HttpRequest], slug: str) -> Type[HttpResponse]:
 
 def profile(request: Type[HttpRequest], username: str) -> Type[HttpResponse]:
     """Профиль автора."""
-    author = User.objects.get(username=username)
+    author = get_object_or_404(User, username=username)
     post_list: Type[QuerySet] = author.posts.select_related('author', 'group')
     page_obj = pag_posts(request, post_list)
     user = request.user
-    if not request.user.is_authenticated or request.user == author:
-        show_follow = False
-    else:
-        show_follow = True
-    if request.user.is_authenticated:
-        following = Follow.objects.filter(user=user, author=author).exists()
-    else:
-        following = False
+    show_follow = request.user.is_authenticated and request.user != author
+    following = request.user.is_authenticated and Follow.objects.filter(
+        user=user, author=author).exists()
     context = {
         'page_obj': page_obj,
         'author': author,
@@ -124,7 +118,7 @@ def add_comment(request: Type[HttpRequest],
 
 
 @login_required
-def follow_index(request):
+def follow_index(request: Type[HttpRequest]) -> Type[HttpResponse]:
     post_list = Post.objects.filter(
         author__following__user=request.user
     )
@@ -136,9 +130,11 @@ def follow_index(request):
 
 
 @login_required
-def profile_follow(request, username):
+def profile_follow(
+        request: Type[HttpRequest], username: str
+) -> Type[HttpResponse]:
     user = request.user
-    author = User.objects.get(username=username)
+    author = get_object_or_404(User, username=username)
     if not Follow.objects.filter(
             user=user, author=author
     ).exists() and not user == author:
@@ -147,9 +143,12 @@ def profile_follow(request, username):
 
 
 @login_required
-def profile_unfollow(request, username):
+def profile_unfollow(
+        request: Type[HttpRequest], username: str
+) -> Type[HttpResponse]:
     user = request.user
-    author = User.objects.get(username=username)
-    if Follow.objects.filter(user=user, author=author).exists():
-        Follow.objects.filter(user=user, author=author).delete()
+    author = get_object_or_404(User, username=username)
+    follow = Follow.objects.filter(user=user, author=author)
+    if follow.exists():
+        follow.delete()
     return redirect(reverse('posts:profile', args=(username,)))

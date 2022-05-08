@@ -21,19 +21,6 @@ class PostsPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        small_gif = (
-            b'\x47\x49\x46\x38\x39\x61\x02\x00'
-            b'\x01\x00\x80\x00\x00\x00\x00\x00'
-            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-            b'\x0A\x00\x3B'
-        )
-        uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=small_gif,
-            content_type='image/gif'
-        )
         cls.user_1 = User.objects.create_user(username='auth')
         cls.user_2 = User.objects.create_user(username='auth_2')
         cls.group_1 = Group.objects.create(title='Тестовая группа №1',
@@ -44,8 +31,7 @@ class PostsPagesTests(TestCase):
                                            description='Тестовое описание_2')
         cls.post_1 = Post.objects.create(author=cls.user_1,
                                          text='Самый лучший пост',
-                                         group_id=cls.group_1.id,
-                                         image=uploaded)
+                                         group_id=cls.group_1.id)
         cls.comment_1 = Comment.objects.create(
             author=cls.user_1,
             text='Комментарий к посту 1',
@@ -95,6 +81,7 @@ class PostsPagesTests(TestCase):
         self.authorized_client_2 = Client()
         self.authorized_client.force_login(PostsPagesTests.user_1)
         self.authorized_client_2.force_login(PostsPagesTests.user_2)
+        cache.clear()
 
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
@@ -248,6 +235,20 @@ class PostsPagesTests(TestCase):
 
     def test_image_in_context(self):
         """Проверяем, что картинка в посте попала в контекст нужных страниц."""
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif'
+        )
+        Post.objects.filter(id=1).image = uploaded
         urls = (
             PostsPagesTests.index_url,
             PostsPagesTests.group_1_url,
@@ -258,10 +259,10 @@ class PostsPagesTests(TestCase):
             with self.subTest(url=url):
                 response = self.authorized_client.get(reverse(url, args=args))
                 if url != 'posts:post_detail':
-                    objects = response.context['page_obj'][0]
-                else:
-                    objects = response.context['post']
-                self.assertEqual(PostsPagesTests.post_1.image, objects.image)
+                    self.assertEqual(PostsPagesTests.post_1.image,
+                                     response.context['page_obj'][0].image)
+                self.assertEqual(PostsPagesTests.post_1.image,
+                                 response.context['post'].image)
 
     def test_new_comment_in_post_detail(self):
         """Проверяем, что новый комментарий попал на страницу поста."""
