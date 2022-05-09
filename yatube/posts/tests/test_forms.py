@@ -36,7 +36,6 @@ class PostFormTests(TestCase):
                             group_id=cls.group.id)
         cls.post_id = f'/posts/{PostFormTests.post.id}/'
 
-
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
