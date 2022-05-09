@@ -24,7 +24,7 @@ class AboutURLTests(TestCase):
 
     def test_urls_user_availability(self):
         """URL-адреса доступны пользователю."""
-        urls = ['/about/author/', '/about/tech/']
+        urls = ('/about/author/', '/about/tech/')
         for url in urls:
             with self.subTest(url=url):
                 response = self.guest_client.get(url)

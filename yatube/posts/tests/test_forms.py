@@ -34,6 +34,8 @@ class PostFormTests(TestCase):
         Post.objects.create(author=cls.user,
                             text='Самый лучший пост_2',
                             group_id=cls.group.id)
+        cls.post_id = f'/posts/{PostFormTests.post.id}/'
+
 
     @classmethod
     def tearDownClass(cls):
@@ -122,7 +124,7 @@ class PostFormTests(TestCase):
             group_post_count - posts_changed_group
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertRedirects(response, f'/posts/{PostFormTests.post.id}/')
+        self.assertRedirects(response, PostFormTests.post_id)
         response = self.authorized_client.get(
             reverse('posts:post_edit',
                     kwargs={'post_id': PostFormTests.post.id}))
@@ -150,8 +152,7 @@ class PostFormTests(TestCase):
             Comment.objects.count(), comments_count + new_comment_count
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertRedirects(response,
-                             f'/posts/{PostFormTests.post.id}/')
+        self.assertRedirects(response, PostFormTests.post_id)
         self.assertTrue(
             Comment.objects.filter(
                 text='Текст комментария из формы',
