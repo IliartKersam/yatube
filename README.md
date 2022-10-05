@@ -58,12 +58,19 @@ python manage.py runserver
 - View comments;
 ### Available endpoints:
 `posts/` - Display posts and publications (GET, POST);
+
 `posts/{id}` - Getting, changing, deleting a post with the corresponding id (GET, PUT, PATCH, DELETE);
+
 `posts/{post_id}/comments/` - Get comments on a post with the corresponding post_id and publish new comments (GET, POST);
+
 `posts/{post_id}/comments/{id}` - Getting, editing, deleting a comment with the corresponding id to a post with the corresponding post_id (GET, PUT, PATCH, DELETE);
+
 `posts/groups/` - Getting a description of registered communities (GET);
+
 `posts/groups/{id}/` - Getting a community description with the corresponding id (GET);
+
 `posts/follow/` - Getting information about the current user's subscriptions, creating a new subscription for the user (GET, POST).
+
 ### Author
 Kashtanov Nikolay
 Kazan, 2022
